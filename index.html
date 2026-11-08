@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة متابعة العادات اليومية | إنجاز</title>
+    <meta name="author" content="أ. هبة ضافر">
+    <meta name="description" content="إنجاز: تطبيق لمتابعة العادات اليومية — إعداد أ. هبة ضافر">
+    <meta name="theme-color" content="#059669">
+    <!-- تطبيق قابل للتثبيت على الجوال -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="إنجاز">
+    <!-- كل المكتبات محفوظة داخل التطبيق ليعمل دون إنترنت -->
+    <link rel="stylesheet" href="assets/app.css">
+    <link rel="stylesheet" href="assets/fontawesome.min.css">
+    <script src="assets/chart.umd.js"></script>
+    <script src="assets/confetti.browser.js"></script>
+
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .day-checkbox {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .day-checkbox:active {
+            transform: scale(0.85);
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
+
+    <!-- شريط علوي أنيق -->
+    <header class="sticky top-0 z-40 glassmorphism border-b border-slate-200/80 shadow-sm">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                <div class="w-9 h-9 sm:w-11 sm:h-11 shrink-0 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-leaf text-lg sm:text-xl"></i>
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+                        إنجـاز <span class="hidden sm:inline text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">تتبّع العادات</span>
+                    </h1>
+                    <p class="hidden sm:block text-xs text-slate-500 font-medium">خطوة صغيرة كل يوم تصنع فارقاً عظيماً <span class="hidden sm:inline text-emerald-700 font-semibold">· إعداد: أ. هبة ضافر</span></p>
+                </div>
+            </div>
+
+            <!-- أزرار العمليات السريعة في الهيدر -->
+            <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
+                <button onclick="document.getElementById('historySection').scrollIntoView({behavior:'smooth'})" title="سجلّي" class="flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition text-sm font-semibold">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span class="hidden md:inline">سجلّي</span>
+                </button>
+                <a href="https://wa.me/96179149722?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D9%88%D8%AF%20%D8%AD%D8%AC%D8%B2%20%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9" target="_blank" rel="noopener" title="احجز استشارة لدى أ. هبة ضافر عبر واتساب" class="flex items-center gap-1.5 px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl border border-green-200 bg-green-50 hover:bg-green-100 text-green-700 transition text-sm font-semibold">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span class="hidden lg:inline">احجز استشارة</span>
+                </a>
+                <button onclick="openNicknameModal()" title="تغيير اسمك المستعار" class="px-2.5 py-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition">
+                    <i class="fa-solid fa-user-pen"></i>
+                </button>
+                <button id="soundToggleBtn" onclick="toggleMuteAudio()" title="كتم/تفعيل المؤثر الصوتي" class="px-2.5 py-2 sm:p-2.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="openNewHabitModal()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl font-semibold shadow-md shadow-emerald-600/20 transition-all text-sm">
+                    <i class="fa-solid fa-plus"></i>
+                    <span class="hidden sm:inline">إضافة عادة جديدة</span>
+                    <span class="sm:hidden">إضافة</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+
+        <!-- شريط تثبيت التطبيق على الجوال (يختفي بعد التثبيت) -->
+        <div id="installBanner" class="hidden mb-6 rounded-2xl bg-gradient-to-l from-emerald-600 to-teal-500 text-white p-4 shadow-md shadow-emerald-600/20">
+            <div class="flex items-start gap-3">
+                <img src="icons/icon-192.png" alt="" class="w-11 h-11 rounded-xl shrink-0 border border-white/30">
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-sm">ثبّت «إنجاز» على هاتفك</h3>
+                    <p class="text-xs text-white/90 mt-0.5 leading-relaxed">ليصبح تطبيقاً على شاشتك الرئيسية ويعمل دون إنترنت. ثبّته أولاً، ثم ابدأ تسجيل عاداتك من داخله.</p>
+                    <div class="flex flex-wrap items-center gap-2 mt-3">
+                        <button id="installNowBtn" onclick="installApp()" class="hidden bg-white text-emerald-700 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-50 transition active:scale-95">
+                            <i class="fa-solid fa-mobile-screen-button"></i> تثبيت الآن
+                        </button>
+                        <button onclick="openInstallGuide()" class="bg-white/15 border border-white/30 px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/25 transition">
+                            كيف أثبّته؟
+                        </button>
+                    </div>
+                </div>
+                <button onclick="dismissInstallBanner()" class="w-7 h-7 rounded-full hover:bg-white/20 flex items-center justify-center shrink-0" title="إخفاء">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- الترحيب بالمستخدم باسمه المستعار -->
+        <div class="mb-6 flex items-center justify-between gap-3">
+            <div>
+                <h2 id="greetingText" class="text-2xl font-extrabold text-slate-900">أهلاً بك 👋</h2>
+                <p id="greetingSubText" class="text-sm text-slate-500 mt-1">لنواصل بناء عاداتك اليوم.</p>
+                <p class="sm:hidden text-[11px] text-emerald-700 font-semibold mt-1">إعداد: أ. هبة ضافر</p>
+            </div>
+        </div>
+
+        <!-- لوحة التحكم الإحصائية العلوية (Stats Bar) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- بطاقة 1: نسبة إنجاز اليوم -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-slate-500">إنجاز اليوم</span>
+                    <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-calendar-check"></i>
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div class="text-3xl font-extrabold text-slate-900" id="statTodayRate">0%</div>
+                    <span class="text-xs font-medium text-slate-400" id="statTodayCount">0 من 0 مهام</span>
+                </div>
+                <!-- Progress bar -->
+                <div class="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+                    <div id="statTodayProgressBar" class="bg-emerald-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- بطاقة 2: أفضل سلسلة أيام (Streak) -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-slate-500">أطول سلسلة متتالية</span>
+                    <span class="w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-fire-flame-curved"></i>
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div class="text-3xl font-extrabold text-amber-500 flex items-center gap-1.5">
+                        <span id="statBestStreak">0</span>
+                        <span class="text-sm font-medium text-slate-500">أيام</span>
+                    </div>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-semibold" id="statStreakHabit">لا يوجد بعد</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">الاستمرارية سر بناء العادة الدائمة</p>
+            </div>
+
+            <!-- بطاقة 3: إجمالي إنجازات الأسبوع -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-slate-500">مكتملات هذا الأسبوع</span>
+                    <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div class="text-3xl font-extrabold text-slate-900" id="statWeekTotalCompleted">0</div>
+                    <span class="text-xs font-semibold text-indigo-600" id="statWeekAvgDaily">معدل 0 يومياً</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+                    <div id="statWeekProgressBar" class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- بطاقة 4: العادات النشطة -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-sm font-semibold text-slate-500">العادات المتابعة</span>
+                    <span class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-list-check"></i>
+                    </span>
+                </div>
+                <div class="flex items-baseline justify-between">
+                    <div class="text-3xl font-extrabold text-slate-900" id="statTotalHabitsCount">0</div>
+                    <span class="text-xs px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 font-medium" id="statCategoriesCount">0 فئات</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-3">التوازن بين مجالات الحياة هو الأهم</p>
+            </div>
+        </div>
+
+        <!-- قسم التحكم والتاريخ والشارت -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- الرسم البياني للأداء الأسبوعي -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-emerald-500"></i>
+                            معدل الإنجاز خلال أيام الأسبوع
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">نسبة العادات المكتملة لكل يوم من السبت حتى الجمعة</p>
+                    </div>
+                    <!-- Week selector navigation -->
+                    <div class="flex items-center bg-slate-100/80 p-1 rounded-xl text-xs font-semibold">
+                        <button onclick="navigateWeek(-1)" class="p-1.5 px-3 rounded-lg hover:bg-white text-slate-600 transition shadow-sm" title="الأسبوع السابق">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <span id="currentWeekRangeDisplay" class="px-3 text-slate-700 select-none">هذا الأسبوع</span>
+                        <button id="nextWeekBtn" onclick="navigateWeek(1)" class="p-1.5 px-3 rounded-lg hover:bg-white text-slate-600 transition shadow-sm disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent" title="الأسبوع التالي">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="h-64 w-full">
+                    <canvas id="weeklyProgressChart"></canvas>
+                </div>
+            </div>
+
+            <!-- بطاقة الاقتباس والتحفيز + تصنيف الفئات -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-quote-right text-amber-500"></i>
+                            ومضة تحفيزية
+                        </h3>
+                        <button onclick="refreshQuote()" class="text-slate-400 hover:text-slate-600 text-xs transition" title="اقتباس آخر">
+                            <i class="fa-solid fa-arrows-rotate"></i>
+                        </button>
+                    </div>
+                    <div class="bg-gradient-to-br from-amber-50/60 to-orange-50/40 p-4 rounded-xl border border-amber-100/70 relative">
+                        <p id="motivationalQuoteText" class="text-sm text-amber-950 font-medium leading-relaxed italic">
+                            "أحب الأعمال إلى الله أدومها وإن قل."
+                        </p>
+                        <p id="motivationalQuoteAuthor" class="text-xs text-amber-700 font-semibold mt-2 text-left">
+                            — حديث شريف
+                        </p>
+                    </div>
+                </div>
+
+                <!-- نظرة سريعة على توازن الفئات -->
+                <div class="mt-6 border-t border-slate-100 pt-5">
+                    <h4 class="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">توزيع عاداتك حسب الفئات</h4>
+                    <div id="categoryDistribution" class="space-y-2">
+                        <!-- تُحقن بواسطة الجافاسكربت -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- جدول / قائمة العادات الأسبوعية -->
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
+            <!-- ترويسة الجدول وفلاتر الفئة -->
+            <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></div>
+                    <h2 class="text-lg font-bold text-slate-900">جدول متابعة الأسبوع</h2>
+                    <span id="activeWeekBadge" class="text-xs bg-slate-200/80 text-slate-700 font-medium px-2.5 py-0.5 rounded-full"></span>
+                </div>
+
+                <!-- أزرار التصفية والخيارات -->
+                <div class="flex flex-wrap items-center gap-2 min-w-0 max-w-full">
+                    <div class="flex items-center bg-white border border-slate-200 rounded-xl p-1 text-xs max-w-full overflow-x-auto whitespace-nowrap">
+                        <button onclick="filterHabits('all')" class="category-filter-btn shrink-0 active px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="all">الكل</button>
+                        <button onclick="filterHabits('صحة')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="صحة">صحة</button>
+                        <button onclick="filterHabits('تعلم')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="تعلم">تعلم</button>
+                        <button onclick="filterHabits('رياضة')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="رياضة">رياضة</button>
+                        <button onclick="filterHabits('روحانيات')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="روحانيات">روحانيات</button>
+                        <button onclick="filterHabits('إنتاجية')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="إنتاجية">إنتاجية</button>
+                        <button onclick="filterHabits('مالية')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="مالية">مالية</button>
+                        <button onclick="filterHabits('أخرى')" class="category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50" data-cat="أخرى">أخرى</button>
+                    </div>
+
+                    <button onclick="resetCurrentWeekData()" class="px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 transition flex items-center gap-1.5" title="مسح إنجازات الأسبوع المعروض فقط">
+                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                        <span>تصفير الأسبوع</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- محتوى الجدول القابل للتمرير الأفقي بسلاسة في الموبايل -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse min-w-[700px]">
+                    <thead>
+                        <tr class="border-b border-slate-100 bg-slate-50/70 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                            <th class="py-4 px-3 sm:px-6 text-right w-1/4 sticky right-0 z-10 bg-slate-50 shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.08)]">العادة والفئة</th>
+                            <!-- رؤوس الأيام تضاف عبر JS مع تمييز اليوم الحالي -->
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="0">السبت</th>
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="1">الأحد</th>
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="2">الاثنين</th>
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="3">الثلاثاء</th>
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="4">الأربعاء</th>
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="5">الخميس</th>
+                            <th class="py-3 px-2 text-center day-col-header" data-day-index="6">الجمعة</th>
+                            <th class="py-4 px-4 text-center">السلسلة</th>
+                            <th class="py-4 px-4 text-center">الإنجاز</th>
+                            <th class="py-4 px-4 text-center">خيارات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="habitsTableBody" class="divide-y divide-slate-100 text-sm">
+                        <!-- يُعبأ ديناميكياً بواسطة JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- حالة القائمة الفارغة -->
+            <div id="emptyStateContainer" class="hidden p-12 text-center">
+                <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                    <i class="fa-regular fa-clipboard"></i>
+                </div>
+                <h3 id="emptyStateTitle" class="text-base font-bold text-slate-800 mb-1">لا توجد عادات مسجلة بعد</h3>
+                <p id="emptyStateDesc" class="text-xs text-slate-400 mb-4 max-w-sm mx-auto">ابدأ رحلتك بإضافة أول هدف يومي ترغب في الالتزام به وبناء مستقبلك خطوة بخطوة.</p>
+                <div class="flex items-center justify-center gap-2">
+                    <button id="emptyStateShowAllBtn" onclick="filterHabits('all')" class="hidden border border-slate-200 text-slate-600 hover:bg-slate-50 px-5 py-2 rounded-xl text-xs font-bold transition">
+                        عرض كل العادات
+                    </button>
+                    <button id="emptyStateAddBtn" onclick="openNewHabitModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-bold transition">
+                        + أضف عادتك الأولى
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم «سجلّي»: السجل الكامل منذ البداية -->
+        <section id="historySection" class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8 scroll-mt-24">
+            <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/50">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i>
+                        سجلّي
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">مسيرتك كاملة منذ أول يوم</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <span id="lastBackupText" class="text-[11px] text-slate-400"></span>
+                    <button onclick="exportBackup()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm">
+                        <i class="fa-solid fa-download"></i> حفظ نسخة
+                    </button>
+                    <button onclick="document.getElementById('importFileInput').click()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border border-slate-200 text-slate-700 hover:bg-slate-50 transition">
+                        <i class="fa-solid fa-upload"></i> استرجاع نسخة
+                    </button>
+                    <input type="file" id="importFileInput" accept=".json,application/json" class="hidden" onchange="handleImportFile(event)">
+                </div>
+            </div>
+
+            <div class="p-5">
+                <!-- أرقام السجل -->
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                        <div class="text-[11px] font-semibold text-slate-500 mb-1">تاريخ البداية</div>
+                        <div id="histStartDate" class="text-base font-extrabold text-slate-900">—</div>
+                        <div id="histDaysSince" class="text-[11px] text-slate-400 mt-0.5"></div>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                        <div class="text-[11px] font-semibold text-slate-500 mb-1">الأسابيع التي عملت فيها</div>
+                        <div id="histActiveWeeks" class="text-2xl font-extrabold text-indigo-600">0</div>
+                        <div id="histTotalWeeks" class="text-[11px] text-slate-400 mt-0.5"></div>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                        <div class="text-[11px] font-semibold text-slate-500 mb-1">الأيام التي عملت فيها</div>
+                        <div id="histActiveDays" class="text-2xl font-extrabold text-emerald-600">0</div>
+                        <div id="histPerfectDays" class="text-[11px] text-slate-400 mt-0.5"></div>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100">
+                        <div class="text-[11px] font-semibold text-slate-500 mb-1">مجموع الإنجازات</div>
+                        <div id="histTotalDone" class="text-2xl font-extrabold text-slate-900">0</div>
+                        <div class="text-[11px] text-slate-400 mt-0.5">مرة أنجزت فيها عادة</div>
+                    </div>
+                    <div class="rounded-xl bg-slate-50 p-4 border border-slate-100 col-span-2 lg:col-span-1">
+                        <div class="text-[11px] font-semibold text-slate-500 mb-1">أطول سلسلة على الإطلاق</div>
+                        <div class="text-2xl font-extrabold text-amber-500"><span id="histBestStreak">0</span> <span class="text-xs text-slate-500 font-medium">يوم</span></div>
+                        <div id="histBestStreakHabit" class="text-[11px] text-slate-400 mt-0.5 truncate"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    <!-- تقويم الشهر -->
+                    <div class="lg:col-span-2">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-sm font-bold text-slate-800">تقويم الإنجاز</h3>
+                            <div class="flex items-center bg-slate-100/80 p-1 rounded-xl text-xs font-semibold">
+                                <button id="prevMonthBtn" onclick="navigateMonth(-1)" class="p-1.5 px-3 rounded-lg hover:bg-white text-slate-600 transition disabled:opacity-30 disabled:cursor-not-allowed" title="الشهر السابق">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                                <span id="historyMonthLabel" class="px-3 text-slate-700 select-none min-w-[110px] text-center"></span>
+                                <button id="nextMonthBtn" onclick="navigateMonth(1)" class="p-1.5 px-3 rounded-lg hover:bg-white text-slate-600 transition disabled:opacity-30 disabled:cursor-not-allowed" title="الشهر التالي">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="historyCalendar" class="grid grid-cols-7 gap-1.5 text-center text-xs"></div>
+                        <div class="flex items-center justify-center gap-3 mt-3 text-[10px] text-slate-500">
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-100 border border-slate-200 inline-block"></span> لا شيء</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-200 inline-block"></span> قليل</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-400 inline-block"></span> أغلبها</span>
+                            <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-600 inline-block"></span> كلها</span>
+                        </div>
+                    </div>
+
+                    <!-- إحصاء كل عادة -->
+                    <div class="lg:col-span-3 overflow-x-auto">
+                        <h3 class="text-sm font-bold text-slate-800 mb-3">كل عادة على حدة</h3>
+                        <table class="w-full text-right text-xs min-w-[460px]">
+                            <thead>
+                                <tr class="text-slate-500 border-b border-slate-100">
+                                    <th class="py-2 px-2 font-bold">العادة</th>
+                                    <th class="py-2 px-2 font-bold text-center">بدأت في</th>
+                                    <th class="py-2 px-2 font-bold text-center">مرات الإنجاز</th>
+                                    <th class="py-2 px-2 font-bold text-center">أطول سلسلة</th>
+                                    <th class="py-2 px-2 font-bold text-center">نسبة الالتزام</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyHabitsBody" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- الفوتر -->
+    <footer class="border-t border-slate-200 bg-white py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex flex-col items-center sm:items-start gap-1">
+                <div>منصة إنجاز لتتبع العادات اليومية © 2026 — <span class="font-bold text-emerald-700">إعداد: أ. هبة ضافر</span></div>
+                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-emerald-600"></i> بياناتك محفوظة على جهازك فقط</span>
+                <button onclick="openInstallGuide()" class="inline-flex items-center gap-1.5 text-emerald-700 font-semibold hover:underline">
+                    <i class="fa-solid fa-mobile-screen-button"></i> كيف أثبّت التطبيق على هاتفي؟
+                </button>
+            </div>
+            <a href="https://wa.me/96179149722?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%20%D8%A3%D9%88%D8%AF%20%D8%AD%D8%AC%D8%B2%20%D8%A7%D8%B3%D8%AA%D8%B4%D8%A7%D8%B1%D8%A9" target="_blank" rel="noopener" class="inline-flex items-center gap-2.5 bg-[#25D366] hover:bg-[#1ebe5a] text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-green-500/20 transition active:scale-95">
+                <i class="fa-brands fa-whatsapp text-lg"></i>
+                <span>لحجز استشارة لدى أ. هبة ضافر عبر واتساب</span>
+                <span dir="ltr" class="bg-white/20 px-2 py-0.5 rounded-lg tracking-wide">+961 79 149 722</span>
+            </a>
+        </div>
+    </footer>
+
+    <!-- نافذة إضافة / تعديل عادة (Modal) -->
+    <div id="habitModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-slate-100 mx-4 transform scale-95 transition-transform duration-300" id="habitModalContent">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 id="modalTitle" class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-emerald-500"></i>
+                    إضافة هدف أو عادة جديدة
+                </h3>
+                <button onclick="closeHabitModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <form id="habitForm" onsubmit="handleHabitSubmit(event)" class="mt-5 space-y-4">
+                <input type="hidden" id="habitEditId" value="">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم العادة أو الهدف *</label>
+                    <input type="text" id="habitTitleInput" required placeholder="مثال: قراءة 15 صفحة، المشي 30 دقيقة" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">الفئة</label>
+                        <select id="habitCategoryInput" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                            <option value="صحة">صحة 🍏</option>
+                            <option value="رياضة">رياضة 🏃‍♂️</option>
+                            <option value="تعلم">تعلم 📚</option>
+                            <option value="روحانيات">روحانيات 🤲</option>
+                            <option value="إنتاجية">إنتاجية ⚡</option>
+                            <option value="مالية">مالية 💰</option>
+                            <option value="أخرى">أخرى ✨</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">الرمز التعبيري (الأيقونة)</label>
+                        <input type="text" id="habitIconInput" maxlength="8" value="🎯" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">اللون المميز</label>
+                    <div class="flex items-center gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="habitColor" value="#10b981" checked class="sr-only peer">
+                            <span class="w-7 h-7 rounded-full bg-emerald-500 block peer-checked:ring-4 peer-checked:ring-emerald-200 transition"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="habitColor" value="#3b82f6" class="sr-only peer">
+                            <span class="w-7 h-7 rounded-full bg-blue-500 block peer-checked:ring-4 peer-checked:ring-blue-200 transition"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="habitColor" value="#8b5cf6" class="sr-only peer">
+                            <span class="w-7 h-7 rounded-full bg-purple-500 block peer-checked:ring-4 peer-checked:ring-purple-200 transition"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="habitColor" value="#f59e0b" class="sr-only peer">
+                            <span class="w-7 h-7 rounded-full bg-amber-500 block peer-checked:ring-4 peer-checked:ring-amber-200 transition"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="habitColor" value="#ec4899" class="sr-only peer">
+                            <span class="w-7 h-7 rounded-full bg-pink-500 block peer-checked:ring-4 peer-checked:ring-pink-200 transition"></span>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="habitColor" value="#06b6d4" class="sr-only peer">
+                            <span class="w-7 h-7 rounded-full bg-cyan-500 block peer-checked:ring-4 peer-checked:ring-cyan-200 transition"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeHabitModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition active:scale-95">
+                        حفظ العادة
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة الاسم المستعار (Nickname Modal) -->
+    <div id="nicknameModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-100 mx-4 text-center transform scale-95 transition-transform duration-300" id="nicknameModalContent">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-user-astronaut"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 mb-1">بماذا نناديك؟</h4>
+            <p class="text-xs text-slate-500 mb-4 leading-relaxed">اكتب اسماً مستعاراً ليرحّب بك البرنامج به. يُحفظ على جهازك فقط.</p>
+            <form onsubmit="saveNickname(event)">
+                <input type="text" id="nicknameInput" maxlength="20" placeholder="مثال: نجمة الإنجاز" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition mb-4">
+                <div class="flex items-center justify-center gap-2">
+                    <button type="button" onclick="skipNickname()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+                        لاحقاً
+                    </button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition active:scale-95">
+                        حفظ الاسم
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- نافذة شرح التثبيت (Install Guide) -->
+    <div id="installGuideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-slate-100 mx-4 max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-300" id="installGuideModalContent">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-mobile-screen-button text-emerald-600"></i>
+                    تثبيت التطبيق على الهاتف
+                </h3>
+                <button onclick="hideModal('installGuideModal','installGuideModalContent')" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 rounded-xl bg-amber-50 border border-amber-100 p-3 text-xs text-amber-900 leading-relaxed">
+                <i class="fa-solid fa-circle-info"></i>
+                إذا فتحت الرابط من داخل <b>واتساب</b> أو <b>تلغرام</b>، فافتحه أولاً في متصفح الهاتف:
+                اضغط على النقاط الثلاث <b>⋮</b> أو زر المشاركة، ثم اختر «فتح في المتصفح» أو «Open in browser».
+            </div>
+
+            <div id="guideAndroid" class="mt-4 rounded-xl border border-slate-200 p-4">
+                <h4 class="font-bold text-sm text-slate-900 mb-2 flex items-center gap-2"><i class="fa-brands fa-android text-emerald-600"></i> هواتف أندرويد (متصفح Chrome)</h4>
+                <ol class="list-decimal pr-5 space-y-1.5 text-xs text-slate-600 leading-relaxed">
+                    <li>افتح الرابط في متصفح <b>Chrome</b>.</li>
+                    <li>اضغط زر <b>«تثبيت الآن»</b> في أعلى الصفحة إن ظهر لك.</li>
+                    <li>أو اضغط النقاط الثلاث <b>⋮</b> أعلى الشاشة، ثم <b>«تثبيت التطبيق»</b> أو <b>«إضافة إلى الشاشة الرئيسية»</b>.</li>
+                    <li>ستجد أيقونة «إنجاز» على شاشتك الرئيسية. افتحه منها دائماً.</li>
+                </ol>
+            </div>
+
+            <div id="guideIOS" class="mt-3 rounded-xl border border-slate-200 p-4">
+                <h4 class="font-bold text-sm text-slate-900 mb-2 flex items-center gap-2"><i class="fa-brands fa-apple text-slate-700"></i> آيفون (متصفح Safari)</h4>
+                <ol class="list-decimal pr-5 space-y-1.5 text-xs text-slate-600 leading-relaxed">
+                    <li>افتح الرابط في متصفح <b>Safari</b>.</li>
+                    <li>اضغط زر <b>المشاركة</b> <i class="fa-solid fa-arrow-up-from-bracket"></i> أسفل الشاشة.</li>
+                    <li>مرّر للأسفل واختر <b>«إضافة إلى الشاشة الرئيسية»</b> (Add to Home Screen)، ثم <b>«إضافة»</b>.</li>
+                    <li>افتح «إنجاز» من الأيقونة على شاشتك الرئيسية دائماً.</li>
+                </ol>
+            </div>
+
+            <p class="mt-4 text-[11px] text-slate-500 leading-relaxed">
+                <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                بياناتك تُحفظ داخل التطبيق على هاتفك فقط. لذلك ثبّت التطبيق أولاً ثم ابدأ التسجيل من داخله، واحفظ نسخة احتياطية كل أسبوع من قسم «سجلّي».
+            </p>
+        </div>
+    </div>
+
+    <!-- نافذة التذكير الأسبوعي بحفظ نسخة (Backup Reminder) -->
+    <div id="backupReminderModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-100 mx-4 text-center transform scale-95 transition-transform duration-300" id="backupReminderModalContent">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-2xl">
+                <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <h4 id="backupReminderTitle" class="text-base font-bold text-slate-900 mb-1">أسبوع جديد، احفظ سجلّك!</h4>
+            <p class="text-xs text-slate-500 mb-5 leading-relaxed">بياناتك محفوظة على هذا الجهاز فقط، وقد تضيع إذا حُذف التطبيق أو مُسحت بيانات المتصفح. احفظ نسخة من سجلّك في جهازك لتسترجعها متى شئت.</p>
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="dismissBackupReminder()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+                    ليس الآن
+                </button>
+                <button onclick="acceptBackupReminder()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> حفظ نسخة الآن
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد الإجراءات (Confirmation Modal) -->
+    <div id="confirmModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl border border-slate-100 mx-4 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-3 text-xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 mb-1" id="confirmModalTitle">تأكيد الحذف</h4>
+            <p class="text-xs text-slate-500 mb-5 leading-relaxed" id="confirmModalDesc">هل أنت متأكد من رغبتك في هذا الإجراء؟ لا يمكن التراجع عنه.</p>
+            <div class="flex items-center justify-center gap-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-semibold hover:bg-slate-50 transition">
+                    تراجع
+                </button>
+                <button id="confirmModalActionBtn" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition">
+                    نعم، نفّذ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- رسائل التنبيه العائمة (Toast) -->
+    <div id="toastNotification" class="fixed bottom-5 left-5 z-50 flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-medium transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="toastMessage">تم الحفظ بنجاح</span>
+    </div>
+
+    <!-- JavaScript الأساسي للتطبيق -->
+    <script>
+        // ثوابت ومفاتيح التخزين
+        const STORAGE_KEY = 'injaz_habits_data_v2';
+        const SETTINGS_KEY = 'injaz_settings_v1';
+        const DAYS_NAMES = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
+        
+        const MOTIVATIONAL_QUOTES = [
+            { quote: "أحب الأعمال إلى الله أدومها وإن قل.", author: "حديث شريف" },
+            { quote: "نحن ما نقوم به مراراً وتكراراً؛ التميز إذن ليس فعلاً بل عادة.", author: "ويل ديورانت في شرح فلسفة أرسطو" },
+            { quote: "النجاح هو حاصل تراكم جهود صغيرة تتكرر يوماً بعد يوم.", author: "روبرت كولير" },
+            { quote: "لا تنتظر الفرصة المثالية، ابدأ بعادتك البسيطة واجعلها عظيمة.", author: "حكمة معاصرة" },
+            { quote: "قوة العادات تبدأ بقرار صغير، وتنتهي بمصير يغير حياتك بالكامل.", author: "مستوحى من كتاب «العادات الذرية»" }
+        ];
+
+        // الحالة العامة للتطبيق (State)
+        let state = {
+            habits: [],
+            // logs: { habitId: { "YYYY-MM-DD": true } }
+            logs: {},
+            currentWeekOffset: 0, // 0 يعني هذا الأسبوع، -1 الأسبوع الماضي، وهكذا
+            activeCategoryFilter: 'all',
+            isSoundMuted: false,
+            nickname: '',
+            nicknameAsked: false,
+            lastBackupAt: null,
+            lastBackupPromptWeek: null, // رقم آخر أسبوع عُرض فيه التذكير
+            historyMonthOffset: 0 // 0 = الشهر الحالي
+        };
+
+        // حفظ واسترجاع الإعدادات (الاسم المستعار وحالة الصوت)
+        function loadSettings() {
+            try {
+                const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+                state.nickname = typeof s.nickname === 'string' ? s.nickname : '';
+                state.nicknameAsked = !!s.nicknameAsked;
+                state.isSoundMuted = !!s.isSoundMuted;
+                state.lastBackupAt = s.lastBackupAt || null;
+                state.lastBackupPromptWeek = typeof s.lastBackupPromptWeek === 'number' ? s.lastBackupPromptWeek : null;
+            } catch (e) {
+                console.error('Error reading settings', e);
+            }
+        }
+
+        function saveSettings() {
+            try {
+                localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+                    nickname: state.nickname,
+                    nicknameAsked: state.nicknameAsked,
+                    isSoundMuted: state.isSoundMuted,
+                    lastBackupAt: state.lastBackupAt,
+                    lastBackupPromptWeek: state.lastBackupPromptWeek
+                }));
+            } catch (e) {
+                console.error('Error saving settings', e);
+            }
+        }
+
+        function updateSoundIcon() {
+            const icon = document.getElementById('soundIcon');
+            icon.className = state.isSoundMuted
+                ? 'fa-solid fa-volume-xmark text-rose-500'
+                : 'fa-solid fa-volume-high text-slate-600';
+        }
+
+        // الترحيب بالاسم المستعار
+        function renderGreeting() {
+            const hour = new Date().getHours();
+            const timeGreeting = hour < 12 ? 'صباح الخير' : 'مساء الخير';
+            const name = state.nickname;
+            document.getElementById('greetingText').textContent = name
+                ? `${timeGreeting} يا ${name} 👋`
+                : `${timeGreeting} 👋`;
+            document.getElementById('greetingSubText').textContent = name
+                ? 'خطوة اليوم تقرّبك من أفضل نسخة منك.'
+                : 'لنواصل بناء عاداتك اليوم.';
+        }
+
+        function openNicknameModal() {
+            document.getElementById('nicknameInput').value = state.nickname;
+            showModal('nicknameModal', 'nicknameModalContent');
+            setTimeout(() => document.getElementById('nicknameInput').focus(), 50);
+        }
+
+        function saveNickname(e) {
+            e.preventDefault();
+            state.nickname = document.getElementById('nicknameInput').value.trim().slice(0, 20);
+            state.nicknameAsked = true;
+            saveSettings();
+            hideModal('nicknameModal', 'nicknameModalContent');
+            renderGreeting();
+            showToast(state.nickname ? `أهلاً بك يا ${state.nickname}!` : 'تم حذف الاسم المستعار');
+        }
+
+        function skipNickname() {
+            state.nicknameAsked = true;
+            saveSettings();
+            hideModal('nicknameModal', 'nicknameModalContent');
+        }
+
+        let weeklyChartInstance = null;
+        // صوت خفيف عند الإنجاز (بواجهة الصوت المدمجة في المتصفح، دون مكتبات خارجية)
+        let audioCtx = null;
+        let synth = true; // يُبقي توافق باقي الكود
+
+        function initSound() {
+            // يُنشأ سياق الصوت عند أول ضغطة فقط، كما تشترط المتصفحات
+        }
+
+        function playDingSound() {
+            if (state.isSoundMuted) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                [523.25, 783.99].forEach(freq => { // نغمتا C5 و G5
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.0001, now);
+                    gain.gain.exponentialRampToValueAtTime(0.12, now + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+                    osc.connect(gain).connect(audioCtx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                });
+            } catch (e) {
+                // تجاهل أخطاء الصوت
+            }
+        }
+
+        function toggleMuteAudio() {
+            state.isSoundMuted = !state.isSoundMuted;
+            saveSettings();
+            updateSoundIcon();
+            if (state.isSoundMuted) {
+                showToast('تم كتم الصوت');
+            } else {
+                if (!synth) initSound();
+                showToast('تم تفعيل الصوت');
+            }
+        }
+
+        // استرجاع وحفظ البيانات في LocalStorage
+        function loadData() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    state.habits = parsed.habits || [];
+                    state.logs = parsed.logs || {};
+                } else {
+                    // البرنامج يبدأ فارغاً دون أي بيانات
+                    state.habits = [];
+                    state.logs = {};
+                }
+            } catch(e) {
+                console.error("Error reading LocalStorage", e);
+                state.habits = [];
+                state.logs = {};
+            }
+        }
+
+        function saveData() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                    habits: state.habits,
+                    logs: state.logs
+                }));
+            } catch(e) {
+                console.error("Error saving to LocalStorage", e);
+            }
+        }
+
+        // دالة مساعدة لحساب تواريخ الأسبوع (يبدأ السبت وينتهي الجمعة)
+        function getWeekDates(offsetWeeks = 0) {
+            const now = new Date();
+            // تعديل الأسبوع وفق الـ offset
+            now.setDate(now.getDate() + (offsetWeeks * 7));
+
+            // تحديد يوم السبت الأقرب كنقطة بداية (في JS: الأحد هو 0، السبت هو 6)
+            const currentDayOfWeek = now.getDay(); // 0(Sun) to 6(Sat)
+            // لحساب السبت: إذا كان اليوم هو السبت (6)، الفرق 0. إذا كان الأحد (0)، الفرق -1.
+            const diffToSaturday = currentDayOfWeek === 6 ? 0 : - (currentDayOfWeek + 1);
+
+            const saturday = new Date(now);
+            saturday.setDate(now.getDate() + diffToSaturday);
+            saturday.setHours(0, 0, 0, 0);
+
+            const dates = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(saturday);
+                d.setDate(saturday.getDate() + i);
+                dates.push(formatDateKey(d));
+            }
+            return dates;
+        }
+
+        function formatDateKey(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // تحويل مفتاح التاريخ إلى تاريخ محلي (لا UTC) لتفادي خطأ فرق التوقيت
+        function parseDateKey(dateKey) {
+            const [y, m, d] = dateKey.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        function getTodayKey() {
+            return formatDateKey(new Date());
+        }
+
+        function isFutureDate(dateKey) {
+            return dateKey > getTodayKey(); // صيغة YYYY-MM-DD تسمح بالمقارنة النصية
+        }
+
+        // عدد أيام الأسبوع المعروض التي حلّت فعلاً (حتى اليوم)
+        function getElapsedDays(weekDates) {
+            const n = weekDates.filter(d => !isFutureDate(d)).length;
+            return n > 0 ? n : 7;
+        }
+
+        function formatDisplayDate(dateKey) {
+            const parts = dateKey.split('-');
+            return `${parseInt(parts[2])}/${parseInt(parts[1])}`;
+        }
+
+        // حساب السلسلة المتتالية لكل عادة (Current Streak)
+        function calculateStreak(habitId) {
+            const logs = state.logs[habitId] || {};
+            let streak = 0;
+            const checkDate = new Date();
+            checkDate.setHours(0, 0, 0, 0);
+
+            // نتحقق إذا كان اليوم مسجلاً أو أن آخر تسجيل كان أمس
+            const todayKey = formatDateKey(checkDate);
+            let currentDateStr = todayKey;
+
+            if (!logs[todayKey]) {
+                // إذا لم تسجل اليوم، نختبر أمس إذا كانت السلسلة مستمرة
+                const yesterday = new Date(checkDate);
+                yesterday.setDate(checkDate.getDate() - 1);
+                currentDateStr = formatDateKey(yesterday);
+                if (!logs[currentDateStr]) {
+                    return 0; // السلسلة انقطعت
+                }
+            }
+
+            // فحص الأيام السابقة متتالية
+            let testDate = parseDateKey(currentDateStr);
+            while (true) {
+                const key = formatDateKey(testDate);
+                if (logs[key]) {
+                    streak++;
+                    testDate.setDate(testDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        // حساب أفضل سلسلة عبر جميع العادات
+        function getBestOverallStreak() {
+            let maxStreak = 0;
+            let bestHabit = null;
+            state.habits.forEach(h => {
+                const streak = calculateStreak(h.id);
+                if (streak > maxStreak) {
+                    maxStreak = streak;
+                    bestHabit = h;
+                }
+            });
+            return { maxStreak, bestHabit };
+        }
+
+        // تحديث واجهة المستخدم بالكامل
+        function renderApp() {
+            renderGreeting();
+            renderTable();
+            renderStats();
+            renderChart();
+            renderCategoryDistribution();
+            highlightTodayHeader();
+            renderHistory();
+        }
+
+        // ================= قسم «سجلّي» =================
+        const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+        const SHORT_DAYS = ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'];
+
+        // رقم اليوم منذ 1970 (بلا تأثر بفرق التوقيت أو التوقيت الصيفي)
+        function dayNumber(dateKey) {
+            const [y, m, d] = dateKey.split('-').map(Number);
+            return Math.round(Date.UTC(y, m - 1, d) / 86400000);
+        }
+
+        // رقم الأسبوع (يبدأ السبت). 3 يناير 1970 كان سبتاً = اليوم رقم 2
+        function weekNumber(dateKey) {
+            return Math.floor((dayNumber(dateKey) - 2) / 7);
+        }
+
+        function formatLongDate(dateKey) {
+            const [y, m, d] = dateKey.split('-').map(Number);
+            return `${d} ${MONTH_NAMES[m - 1]} ${y}`;
+        }
+
+        // تواريخ الإنجاز المسجلة لعادة (مرتبة، بلا أيام مستقبلية)
+        function getDoneDates(habitId) {
+            const logs = state.logs[habitId] || {};
+            return Object.keys(logs).filter(k => logs[k] && !isFutureDate(k)).sort();
+        }
+
+        function longestStreakOf(dates) {
+            let best = 0, run = 0, prev = null;
+            dates.forEach(k => {
+                const n = dayNumber(k);
+                run = (prev !== null && n === prev + 1) ? run + 1 : 1;
+                if (run > best) best = run;
+                prev = n;
+            });
+            return best;
+        }
+
+        function getHabitStartKey(habit) {
+            const dates = getDoneDates(habit.id);
+            let start = habit.createdAt ? formatDateKey(new Date(habit.createdAt)) : getTodayKey();
+            if (dates.length && dates[0] < start) start = dates[0];
+            return start;
+        }
+
+        function computeHistory() {
+            const todayKey = getTodayKey();
+            const dayTotals = {}; // تاريخ ← عدد العادات المنجزة
+            let totalDone = 0, bestStreak = 0, bestStreakHabit = null, startKey = null;
+
+            const perHabit = state.habits.map(h => {
+                const dates = getDoneDates(h.id);
+                dates.forEach(k => { dayTotals[k] = (dayTotals[k] || 0) + 1; });
+                totalDone += dates.length;
+                const longest = longestStreakOf(dates);
+                if (longest > bestStreak) { bestStreak = longest; bestStreakHabit = h; }
+                const hStart = getHabitStartKey(h);
+                if (!startKey || hStart < startKey) startKey = hStart;
+                const daysSinceStart = dayNumber(todayKey) - dayNumber(hStart) + 1;
+                return {
+                    habit: h,
+                    start: hStart,
+                    count: dates.length,
+                    longest,
+                    rate: daysSinceStart > 0 ? Math.min(100, Math.round(dates.length / daysSinceStart * 100)) : 0
+                };
+            });
+
+            const activeDays = Object.keys(dayTotals);
+            const activeWeeks = new Set(activeDays.map(weekNumber)).size;
+            const perfectDays = state.habits.length
+                ? activeDays.filter(k => dayTotals[k] >= state.habits.length).length
+                : 0;
+            const totalWeeks = startKey ? weekNumber(todayKey) - weekNumber(startKey) + 1 : 0;
+            const daysSince = startKey ? dayNumber(todayKey) - dayNumber(startKey) + 1 : 0;
+
+            return { dayTotals, totalDone, bestStreak, bestStreakHabit, startKey, perHabit,
+                     activeDaysCount: activeDays.length, activeWeeks, perfectDays, totalWeeks, daysSince };
+        }
+
+        function renderHistory() {
+            const h = computeHistory();
+            const set = (id, txt) => { document.getElementById(id).textContent = txt; };
+
+            set('histStartDate', h.startKey ? formatLongDate(h.startKey) : '—');
+            set('histDaysSince', h.startKey ? `منذ ${h.daysSince} يوم` : '');
+            set('histActiveWeeks', h.activeWeeks);
+            set('histTotalWeeks', h.totalWeeks ? `من أصل ${h.totalWeeks} أسبوع منذ البداية` : '');
+            set('histActiveDays', h.activeDaysCount);
+            set('histPerfectDays', `منها ${h.perfectDays} يوم أنجزت فيه كل عاداتك`);
+            set('histTotalDone', h.totalDone);
+            set('histBestStreak', h.bestStreak);
+            set('histBestStreakHabit', h.bestStreakHabit ? h.bestStreakHabit.title : 'لا يوجد بعد');
+            set('lastBackupText', state.lastBackupAt
+                ? `آخر نسخة: ${formatLongDate(formatDateKey(new Date(state.lastBackupAt)))}`
+                : 'لم تحفظ نسخة احتياطية بعد');
+
+            // جدول العادات
+            const body = document.getElementById('historyHabitsBody');
+            body.innerHTML = h.perHabit.length ? h.perHabit.map(p => `
+                <tr>
+                    <td class="py-2.5 px-2">
+                        <span class="ml-1">${escapeHtml(p.habit.icon || '🎯')}</span>
+                        <span class="font-semibold text-slate-800">${escapeHtml(p.habit.title)}</span>
+                    </td>
+                    <td class="py-2.5 px-2 text-center text-slate-500">${formatLongDate(p.start)}</td>
+                    <td class="py-2.5 px-2 text-center font-bold text-slate-800">${p.count}</td>
+                    <td class="py-2.5 px-2 text-center text-amber-600 font-bold">${p.longest} يوم</td>
+                    <td class="py-2.5 px-2">
+                        <div class="flex items-center gap-2 justify-center">
+                            <div class="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                                <div class="h-1.5 rounded-full" style="width:${p.rate}%; background-color:${p.habit.color}"></div>
+                            </div>
+                            <span class="font-bold text-slate-700 w-9">${p.rate}%</span>
+                        </div>
+                    </td>
+                </tr>`).join('')
+                : '<tr><td colspan="5" class="py-6 text-center text-slate-400">لا توجد عادات بعد</td></tr>';
+
+            renderHistoryCalendar(h);
+        }
+
+        function renderHistoryCalendar(h) {
+            const now = new Date();
+            const first = new Date(now.getFullYear(), now.getMonth() + state.historyMonthOffset, 1);
+            const year = first.getFullYear(), month = first.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const lead = (first.getDay() + 1) % 7; // عدد الخانات قبل أول يوم (الأسبوع يبدأ السبت)
+            const total = state.habits.length;
+            const todayKey = getTodayKey();
+
+            document.getElementById('historyMonthLabel').textContent = `${MONTH_NAMES[month]} ${year}`;
+            document.getElementById('nextMonthBtn').disabled = state.historyMonthOffset >= 0;
+            const startMonthKey = h.startKey ? h.startKey.slice(0, 7) : todayKey.slice(0, 7);
+            const thisMonthKey = `${year}-${String(month + 1).padStart(2, '0')}`;
+            document.getElementById('prevMonthBtn').disabled = thisMonthKey <= startMonthKey;
+
+            let html = SHORT_DAYS.map(d => `<div class="text-[10px] font-bold text-slate-400 pb-1">${d}</div>`).join('');
+            for (let i = 0; i < lead; i++) html += '<div></div>';
+            for (let d = 1; d <= daysInMonth; d++) {
+                const key = formatDateKey(new Date(year, month, d));
+                const done = h.dayTotals[key] || 0;
+                const future = key > todayKey;
+                const beforeStart = !h.startKey || key < h.startKey;
+                let cls = 'bg-slate-100 text-slate-500 border border-slate-200/60';
+                if (future || beforeStart) cls = 'bg-transparent text-slate-300 border border-dashed border-slate-200';
+                else if (total && done >= total) cls = 'bg-emerald-600 text-white';
+                else if (total && done / total >= 0.5) cls = 'bg-emerald-400 text-white';
+                else if (done > 0) cls = 'bg-emerald-200 text-emerald-900';
+                const ring = key === todayKey ? ' ring-2 ring-amber-400' : '';
+                const tip = future ? 'لم يأتِ بعد' : `${done} من ${total}`;
+                html += `<div class="aspect-square rounded-lg flex items-center justify-center font-semibold ${cls}${ring}" title="${formatLongDate(key)}: ${tip}">${d}</div>`;
+            }
+            document.getElementById('historyCalendar').innerHTML = html;
+        }
+
+        function navigateMonth(direction) {
+            if (state.historyMonthOffset + direction > 0) return;
+            state.historyMonthOffset += direction;
+            renderHistoryCalendar(computeHistory());
+        }
+
+        // ================= النسخ الاحتياطي =================
+        function exportBackup() {
+            const data = {
+                app: 'injaz-habit-tracker',
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                nickname: state.nickname,
+                habits: state.habits,
+                logs: state.logs
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `injaz-backup-${getTodayKey()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+            state.lastBackupAt = data.exportedAt;
+            saveSettings();
+            renderHistory();
+            showToast('تم حفظ النسخة في مجلد التنزيلات');
+        }
+
+        // ================= التذكير الأسبوعي بحفظ نسخة =================
+        // يظهر عند أول فتح للبرنامج في كل أسبوع جديد (يبدأ السبت)،
+        // إلا إذا حُفظت نسخة خلال هذا الأسبوع، أو لم يكن هناك أي إنجاز مسجّل بعد.
+        function shouldShowBackupReminder() {
+            const thisWeek = weekNumber(getTodayKey());
+            const hasAnyLog = Object.values(state.logs).some(l => l && Object.keys(l).length > 0);
+            if (!hasAnyLog) return false;
+            // لا تذكير في الأسبوع الأول من استخدام التطبيق
+            const allKeys = Object.values(state.logs).flatMap(l => Object.keys(l || {})).sort();
+            if (allKeys.length && weekNumber(allKeys[0]) === thisWeek) return false;
+            if (state.lastBackupPromptWeek === thisWeek) return false;
+            if (state.lastBackupAt && weekNumber(formatDateKey(new Date(state.lastBackupAt))) === thisWeek) return false;
+            return true;
+        }
+
+        function maybeShowBackupReminder() {
+            if (!shouldShowBackupReminder()) return;
+            const name = state.nickname ? ` يا ${state.nickname}` : '';
+            document.getElementById('backupReminderTitle').textContent = `أسبوع جديد${name}، احفظ سجلّك!`;
+            showModal('backupReminderModal', 'backupReminderModalContent');
+        }
+
+        function markBackupPromptShown() {
+            state.lastBackupPromptWeek = weekNumber(getTodayKey());
+            saveSettings();
+            hideModal('backupReminderModal', 'backupReminderModalContent');
+        }
+
+        function dismissBackupReminder() {
+            markBackupPromptShown();
+            showToast('يمكنك حفظ نسخة في أي وقت من قسم «سجلّي»');
+        }
+
+        function acceptBackupReminder() {
+            markBackupPromptShown();
+            exportBackup();
+        }
+
+        const ALLOWED_CATEGORIES =['صحة', 'رياضة', 'تعلم', 'روحانيات', 'إنتاجية', 'مالية', 'أخرى'];
+        const DATE_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+        // تنظيف بيانات الملف المستورد والتحقق منها
+        function sanitizeBackup(data) {
+            if (!data || !Array.isArray(data.habits) || typeof data.logs !== 'object' || data.logs === null) {
+                throw new Error('invalid');
+            }
+            const habits = data.habits
+                .filter(h => h && typeof h.id === 'string' && /^[\w-]+$/.test(h.id) && typeof h.title === 'string' && h.title.trim())
+                .map(h => ({
+                    id: h.id,
+                    title: h.title.trim().slice(0, 100),
+                    category: ALLOWED_CATEGORIES.includes(h.category) ? h.category : 'أخرى',
+                    icon: typeof h.icon === 'string' && h.icon.trim() ? h.icon.trim().slice(0, 8) : '🎯',
+                    color: typeof h.color === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(h.color) ? h.color : '#10b981',
+                    createdAt: h.createdAt && !isNaN(new Date(h.createdAt)) ? h.createdAt : new Date().toISOString()
+                }));
+            const logs = {};
+            habits.forEach(h => {
+                const src = data.logs[h.id];
+                if (src && typeof src === 'object') {
+                    logs[h.id] = {};
+                    Object.keys(src).forEach(k => {
+                        if (DATE_KEY_RE.test(k) && src[k] === true) logs[h.id][k] = true;
+                    });
+                }
+            });
+            const nickname = typeof data.nickname === 'string' ? data.nickname.trim().slice(0, 20) : '';
+            return { habits, logs, nickname };
+        }
+
+        function handleImportFile(e) {
+            const file = e.target.files[0];
+            e.target.value = ''; // للسماح باختيار الملف نفسه مرة أخرى
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                let clean;
+                try {
+                    clean = sanitizeBackup(JSON.parse(reader.result));
+                } catch (err) {
+                    showToast('⚠️ هذا الملف ليس نسخة احتياطية صالحة من برنامج إنجاز');
+                    return;
+                }
+                const doneCount = Object.values(clean.logs).reduce((s, l) => s + Object.keys(l).length, 0);
+                showConfirmModal(
+                    'استرجاع النسخة الاحتياطية',
+                    `تحتوي النسخة على ${clean.habits.length} عادة و${doneCount} إنجاز. سيحلّ محتواها محلّ بياناتك الحالية على هذا الجهاز. هل تريد المتابعة؟`,
+                    () => {
+                        state.habits = clean.habits;
+                        state.logs = clean.logs;
+                        if (clean.nickname) {
+                            state.nickname = clean.nickname;
+                            state.nicknameAsked = true;
+                            saveSettings();
+                        }
+                        saveData();
+                        state.currentWeekOffset = 0;
+                        state.historyMonthOffset = 0;
+                        filterHabits('all');
+                        renderApp();
+                        showToast('تم استرجاع بياناتك بنجاح');
+                    }
+                );
+            };
+            reader.readAsText(file);
+        }
+
+        // إبراز عمود اليوم الحالي في الترويسة
+        function highlightTodayHeader() {
+            const todayKey = formatDateKey(new Date());
+            const currentWeekDates = getWeekDates(state.currentWeekOffset);
+            const todayIndex = currentWeekDates.indexOf(todayKey);
+
+            document.querySelectorAll('.day-col-header').forEach((el) => {
+                const idx = parseInt(el.dataset.dayIndex);
+                const dateForThisCol = currentWeekDates[idx];
+                const displayStr = `${DAYS_NAMES[idx]} <br><span class="text-[10px] font-normal opacity-75">${formatDisplayDate(dateForThisCol)}</span>`;
+                el.innerHTML = displayStr;
+
+                if (idx === todayIndex) {
+                    el.className = 'py-3 px-2 text-center day-col-header bg-emerald-100/60 text-emerald-800 font-extrabold rounded-t-xl transition';
+                } else {
+                    el.className = 'py-3 px-2 text-center day-col-header text-slate-500 font-bold';
+                }
+            });
+        }
+
+        // بناء جدول العادات
+        function renderTable() {
+            const tableBody = document.getElementById('habitsTableBody');
+            const emptyState = document.getElementById('emptyStateContainer');
+            const weekDates = getWeekDates(state.currentWeekOffset);
+
+            // تصفية حسب الفئة المختارة
+            const filteredHabits = state.activeCategoryFilter === 'all' 
+                ? state.habits 
+                : state.habits.filter(h => h.category === state.activeCategoryFilter);
+
+            if (filteredHabits.length === 0) {
+                tableBody.innerHTML = '';
+                const isFiltered = state.activeCategoryFilter !== 'all' && state.habits.length > 0;
+                document.getElementById('emptyStateTitle').textContent = isFiltered
+                    ? `لا توجد عادات في فئة «${state.activeCategoryFilter}»`
+                    : 'لا توجد عادات مسجلة بعد';
+                document.getElementById('emptyStateDesc').textContent = isFiltered
+                    ? 'يمكنك عرض كل عاداتك، أو إضافة عادة جديدة في هذه الفئة.'
+                    : 'ابدأ رحلتك بإضافة أول هدف يومي ترغب في الالتزام به وبناء مستقبلك خطوة بخطوة.';
+                document.getElementById('emptyStateAddBtn').textContent = isFiltered ? '+ أضف عادة' : '+ أضف عادتك الأولى';
+                document.getElementById('emptyStateShowAllBtn').classList.toggle('hidden', !isFiltered);
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            const elapsedDays = getElapsedDays(weekDates);
+            const todayKey = getTodayKey();
+
+            let html = '';
+            filteredHabits.forEach(habit => {
+                const habitLogs = state.logs[habit.id] || {};
+                const streak = calculateStreak(habit.id);
+
+                // حساب إنجاز هذا الأسبوع فقط
+                let weekDoneCount = 0;
+                weekDates.forEach(d => {
+                    if (habitLogs[d]) weekDoneCount++;
+                });
+                const weekRate = Math.round((weekDoneCount / elapsedDays) * 100);
+
+                html += `
+                <tr class="hover:bg-slate-50/70 transition-colors group">
+                    <!-- اسم العادة -->
+                    <td class="py-4 px-3 sm:px-6 sticky right-0 z-10 bg-white group-hover:bg-slate-50 transition-colors shadow-[-6px_0_8px_-6px_rgba(0,0,0,0.08)] min-w-[150px]">
+                        <div class="flex items-center gap-2 sm:gap-3">
+                            <span class="text-xl sm:text-2xl p-1.5 sm:p-2 shrink-0 rounded-2xl bg-slate-100 flex items-center justify-center border border-slate-200/50 shadow-xs" style="color: ${habit.color}">
+                                ${escapeHtml(habit.icon || '🎯')}
+                            </span>
+                            <div>
+                                <h4 class="font-bold text-slate-900 leading-snug">${escapeHtml(habit.title)}</h4>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full" style="background-color: ${habit.color}15; color: ${habit.color};">
+                                        ${habit.category}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- خانات الأيام السبعة -->
+                    ${weekDates.map((dateKey, dayIdx) => {
+                        const isDone = !!habitLogs[dateKey];
+                        const isToday = (dateKey === todayKey);
+                        if (dateKey > todayKey) {
+                            return `
+                        <td class="py-3 px-2 text-center">
+                            <span class="w-10 h-10 rounded-2xl flex items-center justify-center mx-auto bg-slate-50 border border-dashed border-slate-200 text-slate-300 cursor-not-allowed" title="${DAYS_NAMES[dayIdx]} (${dateKey}) - يوم لم يأتِ بعد">
+                                <i class="fa-solid fa-lock text-[10px]"></i>
+                            </span>
+                        </td>
+                        `;
+                        }
+                        return `
+                        <td class="py-3 px-2 text-center ${isToday ? 'bg-emerald-50/40' : ''}">
+                            <button 
+                                onclick="toggleHabitDay('${habit.id}', '${dateKey}')" 
+                                class="day-checkbox w-10 h-10 rounded-2xl flex items-center justify-center mx-auto text-base transition-all ${
+                                    isDone 
+                                        ? 'text-white shadow-md' 
+                                        : 'bg-slate-100 text-transparent hover:bg-slate-200 border border-slate-200/70'
+                                }"
+                                style="${isDone ? `background-color: ${habit.color}; box-shadow: 0 4px 10px ${habit.color}35;` : ''}"
+                                title="${DAYS_NAMES[dayIdx]} (${dateKey}) - ${isDone ? 'مكتمل (اضغط للإلغاء)' : 'غير مكتمل (اضغط للتحديد)'}"
+                            >
+                                <i class="fa-solid fa-check ${isDone ? 'scale-100' : 'scale-50'} transition-transform duration-200"></i>
+                            </button>
+                        </td>
+                        `;
+                    }).join('')}
+
+                    <!-- السلسلة المتتالية -->
+                    <td class="py-4 px-4 text-center">
+                        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl ${streak > 0 ? 'bg-amber-50 text-amber-600 font-bold' : 'text-slate-400 bg-slate-100 text-xs'}">
+                            <i class="fa-solid fa-fire-flame-curved text-sm ${streak > 0 ? 'text-amber-500 animate-bounce' : 'text-slate-300'}"></i>
+                            <span class="text-xs">${streak} يوم</span>
+                        </div>
+                    </td>
+
+                    <!-- نسبة إنجاز الأسبوع للعادة -->
+                    <td class="py-4 px-4 text-center">
+                        <div class="flex flex-col items-center">
+                            <span class="text-xs font-extrabold text-slate-700">${weekRate}%</span>
+                            <div class="w-16 bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                                <div class="h-1.5 rounded-full transition-all duration-300" style="width: ${weekRate}%; background-color: ${habit.color};"></div>
+                            </div>
+                        </div>
+                    </td>
+
+                    <!-- أزرار الإجراءات (تعديل / حذف) -->
+                    <td class="py-4 px-4 text-center">
+                        <div class="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition">
+                            <button onclick="openEditHabitModal('${habit.id}')" class="p-2 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-emerald-50 transition" title="تعديل العادة">
+                                <i class="fa-solid fa-pen text-xs"></i>
+                            </button>
+                            <button onclick="promptDeleteHabit('${habit.id}')" class="p-2 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition" title="حذف العادة">
+                                <i class="fa-solid fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+        }
+
+        // تحديث بطاقات الإحصائيات الحية
+        function renderStats() {
+            const todayKey = formatDateKey(new Date());
+            const totalHabits = state.habits.length;
+
+            // 1. نسبة إنجاز اليوم
+            let todayCompleted = 0;
+            state.habits.forEach(h => {
+                if (state.logs[h.id] && state.logs[h.id][todayKey]) {
+                    todayCompleted++;
+                }
+            });
+            const todayPercentage = totalHabits > 0 ? Math.round((todayCompleted / totalHabits) * 100) : 0;
+            
+            document.getElementById('statTodayRate').innerText = `${todayPercentage}%`;
+            document.getElementById('statTodayCount').innerText = `${todayCompleted} من ${totalHabits} مهام`;
+            document.getElementById('statTodayProgressBar').style.width = `${todayPercentage}%`;
+
+            // 2. السلسلة المتتالية الأفضل
+            const { maxStreak, bestHabit } = getBestOverallStreak();
+            document.getElementById('statBestStreak').innerText = maxStreak;
+            document.getElementById('statStreakHabit').innerText = bestHabit
+                ? (bestHabit.title.length > 16 ? bestHabit.title.substring(0, 16) + '…' : bestHabit.title)
+                : 'ابدأ اليوم!';
+
+            // 3. إجمالي مكتملات هذا الأسبوع
+            const weekDates = getWeekDates(state.currentWeekOffset);
+            let weekTotalDone = 0;
+            weekDates.forEach(date => {
+                state.habits.forEach(h => {
+                    if (state.logs[h.id] && state.logs[h.id][date]) {
+                        weekTotalDone++;
+                    }
+                });
+            });
+            const elapsedDays = getElapsedDays(weekDates);
+            const maxPossibleWeek = totalHabits * elapsedDays;
+            const weekPercentage = maxPossibleWeek > 0 ? Math.round((weekTotalDone / maxPossibleWeek) * 100) : 0;
+            const avgDaily = (weekTotalDone / elapsedDays).toFixed(1);
+
+            document.getElementById('statWeekTotalCompleted').innerText = weekTotalDone;
+            document.getElementById('statWeekAvgDaily').innerText = `معدل ${avgDaily} يومياً`;
+            document.getElementById('statWeekProgressBar').style.width = `${weekPercentage}%`;
+
+            // 4. إجمالي العادات والفئات
+            const categories = new Set(state.habits.map(h => h.category));
+            document.getElementById('statTotalHabitsCount').innerText = totalHabits;
+            document.getElementById('statCategoriesCount').innerText = `${categories.size} فئات`;
+
+            // نص نطاق الأسبوع المعروض
+            const startDisplay = formatDisplayDate(weekDates[0]);
+            const endDisplay = formatDisplayDate(weekDates[6]);
+            const weekLabel = state.currentWeekOffset === 0 
+                ? 'الأسبوع الحالي' 
+                : state.currentWeekOffset === -1 
+                    ? 'الأسبوع الماضي' 
+                    : `أسبوع (${startDisplay} - ${endDisplay})`;
+            
+            document.getElementById('currentWeekRangeDisplay').innerText = `${startDisplay} — ${endDisplay}`;
+            document.getElementById('activeWeekBadge').innerText = weekLabel;
+            document.getElementById('nextWeekBtn').disabled = state.currentWeekOffset >= 0;
+        }
+
+        // رسم بياني تفاعلي (Chart.js)
+        function renderChart() {
+            const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
+            const weekDates = getWeekDates(state.currentWeekOffset);
+            const totalHabits = state.habits.length;
+
+            const completionRates = weekDates.map(dateKey => {
+                if (isFutureDate(dateKey)) return null; // لا عمود لأيام لم تأتِ بعد
+                if (totalHabits === 0) return 0;
+                let done = 0;
+                state.habits.forEach(h => {
+                    if (state.logs[h.id] && state.logs[h.id][dateKey]) {
+                        done++;
+                    }
+                });
+                return Math.round((done / totalHabits) * 100);
+            });
+
+            const labels = weekDates.map((dateKey, idx) => {
+                return `${DAYS_NAMES[idx]} (${formatDisplayDate(dateKey)})`;
+            });
+
+            if (weeklyChartInstance) {
+                weeklyChartInstance.data.labels = labels;
+                weeklyChartInstance.data.datasets[0].data = completionRates;
+                weeklyChartInstance.update();
+                return;
+            }
+
+            weeklyChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'نسبة النجاح الإجمالية (%)',
+                        data: completionRates,
+                        backgroundColor: function(context) {
+                            const val = context.raw || 0;
+                            if (val >= 80) return 'rgba(34, 197, 94, 0.85)';
+                            if (val >= 50) return 'rgba(99, 102, 241, 0.85)';
+                            if (val > 0) return 'rgba(245, 158, 11, 0.85)';
+                            return 'rgba(226, 232, 240, 0.85)';
+                        },
+                        borderRadius: 10,
+                        borderSkipped: false,
+                        barThickness: 28,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            rtl: true,
+                            callbacks: {
+                                label: function(context) {
+                                    return `الإنجاز: ${context.parsed.y}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: val => val + '%',
+                                stepSize: 25,
+                                font: { family: 'Cairo', size: 10 }
+                            },
+                            grid: {
+                                color: '#f1f5f9'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { family: 'Cairo', size: 11 }
+                            },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // توزيع الفئات الجانبي
+        function renderCategoryDistribution() {
+            const container = document.getElementById('categoryDistribution');
+            const catCounts = {};
+            state.habits.forEach(h => {
+                catCounts[h.category] = (catCounts[h.category] || 0) + 1;
+            });
+
+            const total = state.habits.length || 1;
+            let html = '';
+            for (const [category, count] of Object.entries(catCounts)) {
+                const pct = Math.round((count / total) * 100);
+                html += `
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                            <span>${category}</span>
+                            <span class="text-slate-400">${count} عادة (${pct}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                            <div class="bg-slate-700 h-1.5 rounded-full" style="width: ${pct}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            if (Object.keys(catCounts).length === 0) {
+                html = '<p class="text-xs text-slate-400">لا توجد تصنيفات حالياً</p>';
+            }
+            container.innerHTML = html;
+        }
+
+        // تبديل حالة يوم معين لعادة معينة
+        function toggleHabitDay(habitId, dateKey) {
+            if (isFutureDate(dateKey)) {
+                showToast('لا يمكن تسجيل إنجاز ليوم لم يأتِ بعد');
+                return;
+            }
+            if (!state.logs[habitId]) {
+                state.logs[habitId] = {};
+            }
+
+            const currentVal = !!state.logs[habitId][dateKey];
+            state.logs[habitId][dateKey] = !currentVal;
+
+            if (!currentVal) {
+                // مؤثر صوتي عند إتمام العادة
+                playDingSound();
+
+                // التحقق إذا أنجز كل عادات اليوم لإطلاق الاحتفال
+                checkTodayFullCompletion(dateKey);
+            }
+
+            saveData();
+            renderApp();
+        }
+
+        // احتفال بالكونفيتي عند إكمال جميع أهداف اليوم
+        function checkTodayFullCompletion(dateKey) {
+            const todayKey = formatDateKey(new Date());
+            if (dateKey !== todayKey || state.habits.length === 0) return;
+
+            const allDone = state.habits.every(h => state.logs[h.id] && state.logs[h.id][todayKey]);
+            if (allDone) {
+                confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                showToast(state.nickname
+                    ? `🎉 أحسنت يا ${state.nickname}! أكملت جميع عاداتك اليوم!`
+                    : '🎉 رائع جداً! لقد أكملت جميع عاداتك اليومية بنجاح!');
+            }
+        }
+
+        // تصفية العادات حسب الفئة
+        function filterHabits(category) {
+            state.activeCategoryFilter = category;
+            document.querySelectorAll('.category-filter-btn').forEach(btn => {
+                if (btn.dataset.cat === category) {
+                    btn.className = 'category-filter-btn shrink-0 active px-3 py-1.5 rounded-lg font-medium transition bg-emerald-600 text-white shadow-sm';
+                } else {
+                    btn.className = 'category-filter-btn shrink-0 px-3 py-1.5 rounded-lg font-medium transition text-slate-600 hover:bg-slate-50';
+                }
+            });
+            renderTable();
+        }
+
+        // التنقل بين الأسابيع
+        function navigateWeek(direction) {
+            if (state.currentWeekOffset + direction > 0) return; // لا تنقّل إلى أسابيع قادمة
+            state.currentWeekOffset += direction;
+            renderApp();
+        }
+
+        // تصفير إنجازات الأسبوع المعروض
+        function resetCurrentWeekData() {
+            showConfirmModal(
+                'تصفير إنجازات الأسبوع',
+                'هل أنت متأكد من تصفير حالة الإنجاز لهذا الأسبوع فقط؟ ستبقى العادات وأيام الأسابيع الأخرى محفوظة.',
+                () => {
+                    const weekDates = getWeekDates(state.currentWeekOffset);
+                    weekDates.forEach(date => {
+                        state.habits.forEach(h => {
+                            if (state.logs[h.id]) {
+                                delete state.logs[h.id][date];
+                            }
+                        });
+                    });
+                    saveData();
+                    renderApp();
+                    showToast('تم تصفير الأسبوع بنجاح');
+                }
+            );
+        }
+
+        // إدارة النافذة المنبثقة للعادة (Modal)
+        function openNewHabitModal() {
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-emerald-500"></i> إضافة هدف أو عادة جديدة';
+            document.getElementById('habitEditId').value = '';
+            document.getElementById('habitTitleInput').value = '';
+            document.getElementById('habitCategoryInput').value = 'صحة';
+            document.getElementById('habitIconInput').value = '🎯';
+            // اقتراح الفئة المعروضة حالياً عند الإضافة من داخل فلتر
+            if (state.activeCategoryFilter !== 'all') {
+                document.getElementById('habitCategoryInput').value = state.activeCategoryFilter;
+            }
+
+            showModal('habitModal', 'habitModalContent');
+        }
+
+        function openEditHabitModal(habitId) {
+            const habit = state.habits.find(h => h.id === habitId);
+            if (!habit) return;
+
+            document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-pen-to-square text-emerald-500"></i> تعديل بيانات العادة';
+            document.getElementById('habitEditId').value = habit.id;
+            document.getElementById('habitTitleInput').value = habit.title;
+            document.getElementById('habitCategoryInput').value = habit.category;
+            document.getElementById('habitIconInput').value = habit.icon || '🎯';
+
+            // تفعيل لون العادة
+            const colorRadios = document.querySelectorAll('input[name="habitColor"]');
+            colorRadios.forEach(r => {
+                r.checked = (r.value === habit.color);
+            });
+
+            showModal('habitModal', 'habitModalContent');
+        }
+
+        function closeHabitModal() {
+            hideModal('habitModal', 'habitModalContent');
+        }
+
+        function handleHabitSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('habitEditId').value;
+            const title = document.getElementById('habitTitleInput').value.trim();
+            const category = document.getElementById('habitCategoryInput').value;
+            const icon = document.getElementById('habitIconInput').value.trim() || '🎯';
+            const selectedColor = document.querySelector('input[name="habitColor"]:checked')?.value || '#10b981';
+
+            if (!title) return;
+
+            if (editId) {
+                // تعديل عادة قائمة
+                const idx = state.habits.findIndex(h => h.id === editId);
+                if (idx !== -1) {
+                    state.habits[idx] = {
+                        ...state.habits[idx],
+                        title,
+                        category,
+                        icon,
+                        color: selectedColor
+                    };
+                    showToast('تم تعديل العادة بنجاح');
+                }
+            } else {
+                // إضافة عادة جديدة
+                const newHabit = {
+                    id: 'hab_' + Date.now(),
+                    title,
+                    category,
+                    icon,
+                    color: selectedColor,
+                    createdAt: new Date().toISOString()
+                };
+                state.habits.unshift(newHabit);
+                showToast('تمت إضافة العادة بنجاح');
+            }
+
+            saveData();
+            closeHabitModal();
+            renderApp();
+        }
+
+        // حذف عادة
+        function promptDeleteHabit(habitId) {
+            const habit = state.habits.find(h => h.id === habitId);
+            if (!habit) return;
+
+            showConfirmModal(
+                `حذف عادة: ${habit.title}`,
+                'هل أنت متأكد من حذف هذه العادة نهائياً مع كافة سجلاتها؟',
+                () => {
+                    state.habits = state.habits.filter(h => h.id !== habitId);
+                    delete state.logs[habitId];
+                    saveData();
+                    renderApp();
+                    showToast('تم حذف العادة بنجاح');
+                }
+            );
+        }
+
+        // نافذة التأكيد المخصصة (بدون alert و confirm)
+        let confirmActionCallback = null;
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirmModalTitle').innerText = title;
+            document.getElementById('confirmModalDesc').innerText = message;
+            confirmActionCallback = onConfirm;
+
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+            }, 10);
+
+            document.getElementById('confirmModalActionBtn').onclick = () => {
+                if (confirmActionCallback) confirmActionCallback();
+                closeConfirmModal();
+            };
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                confirmActionCallback = null;
+            }, 250);
+        }
+
+        // إظهار وإخفاء النوافذ بمرونة
+        function showModal(modalId, contentId) {
+            const modal = document.getElementById(modalId);
+            const content = document.getElementById(contentId);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            }, 10);
+        }
+
+        function hideModal(modalId, contentId) {
+            const modal = document.getElementById(modalId);
+            const content = document.getElementById(contentId);
+            modal.classList.add('opacity-0');
+            if (content) {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 250);
+        }
+
+        // إشعارات عائمة (Toast)
+        let toastTimeout;
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.innerText = message;
+
+            clearTimeout(toastTimeout);
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // اقتباسات عشوائية
+        function refreshQuote() {
+            const rand = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+            document.getElementById('motivationalQuoteText').innerText = `"${rand.quote}"`;
+            document.getElementById('motivationalQuoteAuthor').innerText = `— ${rand.author}`;
+        }
+
+        // وقاية من الرموز البرمجية
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ================= التثبيت على الجوال =================
+        const INSTALL_DISMISS_KEY = 'injaz_install_banner_dismissed';
+        let deferredInstallPrompt = null;
+
+        function isInstalledApp() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function isIOS() {
+            return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+                   (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        }
+
+        function isMobile() {
+            return isIOS() || /android|mobile/i.test(navigator.userAgent);
+        }
+
+        function updateInstallBanner() {
+            const banner = document.getElementById('installBanner');
+            let dismissed = false;
+            try { dismissed = localStorage.getItem(INSTALL_DISMISS_KEY) === '1'; } catch (e) {}
+            const show = !isInstalledApp() && !dismissed && (isMobile() || deferredInstallPrompt);
+            banner.classList.toggle('hidden', !show);
+            document.getElementById('installNowBtn').classList.toggle('hidden', !deferredInstallPrompt);
+        }
+
+        function dismissInstallBanner() {
+            try { localStorage.setItem(INSTALL_DISMISS_KEY, '1'); } catch (e) {}
+            updateInstallBanner();
+            showToast('يمكنك معرفة طريقة التثبيت من أسفل الصفحة');
+        }
+
+        function openInstallGuide() {
+            // إبراز تعليمات نظام هاتف المستخدم
+            const ios = isIOS();
+            document.getElementById('guideIOS').classList.toggle('border-emerald-400', ios);
+            document.getElementById('guideIOS').classList.toggle('bg-emerald-50/40', ios);
+            document.getElementById('guideAndroid').classList.toggle('border-emerald-400', !ios && isMobile());
+            document.getElementById('guideAndroid').classList.toggle('bg-emerald-50/40', !ios && isMobile());
+            const guides = document.getElementById('guideAndroid').parentNode;
+            if (ios) guides.insertBefore(document.getElementById('guideIOS'), document.getElementById('guideAndroid'));
+            showModal('installGuideModal', 'installGuideModalContent');
+        }
+
+        async function installApp() {
+            if (!deferredInstallPrompt) { openInstallGuide(); return; }
+            deferredInstallPrompt.prompt();
+            const choice = await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            updateInstallBanner();
+            if (choice.outcome === 'accepted') showToast('تم تثبيت «إنجاز» على هاتفك 🎉');
+        }
+
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            updateInstallBanner();
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            updateInstallBanner();
+        });
+
+        if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed', err));
+            });
+        }
+
+        // تشغيل التطبيق عند التحميل
+        window.onload = function() {
+            updateInstallBanner();
+            loadSettings();
+            loadData();
+            updateSoundIcon();
+            if (!state.isSoundMuted) initSound();
+            filterHabits(state.activeCategoryFilter); // لتلوين زر «الكل» من البداية
+            renderApp();
+            refreshQuote();
+            // سؤال المستخدم عن اسمه المستعار في أول زيارة
+            if (!state.nickname && !state.nicknameAsked) {
+                setTimeout(openNicknameModal, 600);
+            } else {
+                // التذكير الأسبوعي بحفظ نسخة (لا يظهر مع نافذة الاسم في الوقت نفسه)
+                setTimeout(maybeShowBackupReminder, 800);
+            }
+        };
+    </script>
+</body>
+</html>
